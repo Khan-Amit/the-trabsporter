@@ -1,25 +1,118 @@
-adding-left: 8px;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Igigi Vault · Treasure Chest</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0e1a;
+            font-family: 'Courier New', monospace;
+            padding: 1rem;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .vault-container {
+            max-width: 1200px;
+            width: 100%;
+            background: #0f1322;
+            border-radius: 2rem;
+            border: 1px solid #ffaa33;
+            overflow: hidden;
+        }
+        .header {
+            background: #080c18;
+            padding: 1rem;
+            border-bottom: 1px solid #ffaa33;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .title { color: #ffcc66; font-weight: bold; }
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            min-height: 450px;
+        }
+        .vault-panel {
+            background: #0c1020;
+            padding: 1.5rem;
+            border-right: 1px solid #2a3a60;
+        }
+        .chest-area {
+            text-align: center;
+            background: #080c1a;
+            border-radius: 1.5rem;
+            padding: 1rem;
+            border: 2px solid #ffaa33;
+            margin-bottom: 1rem;
+        }
+        .chest-icon { font-size: 4rem; cursor: pointer; }
+        .vault-count { font-size: 2rem; color: #ffcc66; }
+        .btc-balance { font-size: 1.2rem; color: #88ff88; }
+        .input-group {
+            display: flex;
+            gap: 8px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        input {
+            background: #010410;
+            border: 1px solid #2a3a60;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 2rem;
+            flex: 1;
+        }
+        button {
+            background: #1f2c46;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 2rem;
+            color: white;
+            cursor: pointer;
+        }
+        button.primary { background: #2a4a7a; }
+        .terminal-panel {
+            background: #03060e;
+            display: flex;
+            flex-direction: column;
+        }
+        .terminal-header {
+            background: #11161f;
+            padding: 0.5rem 1rem;
+            border-bottom: 1px solid #2a3348;
+        }
+        .terminal-content {
+            padding: 1rem;
+            font-size: 0.75rem;
+            color: #8bc4ff;
+            height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+        .log-line {
+            border-left: 2px solid #2a6a8a;
+            padding-left: 8px;
             margin: 4px 0;
         }
         .export-buttons {
             display: flex;
             gap: 10px;
             justify-content: center;
-            margin-top: 10px;
+            margin-top: 15px;
         }
-        .pool-status {
-            font-size: 0.7rem;
-            color: #aaa;
-            margin-top: 10px;
-            text-align: center;
-        }
-        @media (max-width: 780px) { .main-grid { grid-template-columns: 1fr; } .vault-panel { border-right: none; } }
+        @media (max-width: 700px) { .main-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 <div class="vault-container">
     <div class="header">
-        <div class="title"><span>💰 TREASURE CHEST WALLET 💰</span><span class="status-led" id="statusLed"></span></div>
+        <div class="title">💰 TREASURE CHEST WALLET</div>
         <div>🔢 7 13 22 34 41 50</div>
     </div>
     <div class="main-grid">
@@ -29,208 +122,208 @@ adding-left: 8px;
                 <div class="vault-count" id="vaultCount">0</div>
                 <div>PROTECTED SHARES</div>
                 <div class="btc-balance" id="btcBalance">0 BTC</div>
-                <div style="font-size:0.65rem;">real Bitcoin in chest</div>
             </div>
-            <div class="password-area">
-                <div id="authStatus" style="color:#ffaa66; margin-bottom: 8px;">⚡ VAULT LOCKED</div>
-                <div class="input-group">
-                    <input type="password" id="passwordInput" placeholder="Enter password">
-                    <button id="unlockBtn">🔓 UNLOCK</button>
-                </div>
-                <div class="input-group">
-                    <input type="password" id="newPasswordInput" placeholder="New password">
-                    <button id="changePwBtn" class="primary">🔄 CHANGE</button>
-                </div>
-                <div class="export-buttons">
-                    <button id="exportTxtBtn">📄 EXPORT</button>
-                    <button id="exportWhatsAppBtn">📲 WHATSAPP</button>
-                </div>
-                <div class="pool-status" id="poolStatus">⛏️ Pool: ready (auto-submit on)</div>
+            <div class="input-group">
+                <input type="password" id="loginPassword" placeholder="Enter password">
+                <button id="unlockBtn" class="primary">🔓 UNLOCK</button>
             </div>
+            <div class="input-group">
+                <input type="password" id="newPassword" placeholder="New password (min 4 chars)">
+                <button id="changePwBtn">🔄 SET/CHANGE</button>
+            </div>
+            <div class="export-buttons">
+                <button id="exportBtn">📄 EXPORT TXT</button>
+                <button id="whatsappBtn">📲 WHATSAPP</button>
+            </div>
+            <div id="msg" style="color:#ffaa66; font-size:0.7rem; text-align:center; margin-top:10px;"></div>
         </div>
         <div class="terminal-panel">
-            <div class="terminal-header"><span>⚡ IGIGI TERMINAL</span><span id="miningState">🔴 locked</span></div>
+            <div class="terminal-header">⚡ IGIGI TERMINAL <span id="miningState">🔴 locked</span></div>
             <div class="terminal-content" id="terminalLog">
-                <div class="log-line">> TREASURE CHEST VAULT READY</div>
-                <div class="log-line">> Enter password to unlock wallet</div>
+                <div class="log-line">> VAULT READY</div>
+                <div class="log-line">> Enter password to unlock</div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // --------------------------------------------------------------
-    // ENIGMA CORE
+    // ---------- ENIGMA ----------
     const SACRED = [7, 13, 22, 34, 41, 50];
     const GOLDEN = 0x9E3779B9;
-    function enigmaHash(input) {
-        let hash = GOLDEN >>> 0;
-        for (let i = 0; i < input.length; i++) {
-            let c = input.charCodeAt(i);
+    function enigmaHash(str) {
+        let h = GOLDEN >>> 0;
+        for (let i = 0; i < str.length; i++) {
+            let c = str.charCodeAt(i);
             let k = SACRED[i % SACRED.length];
-            hash = ((hash << 4) ^ (hash >>> 28) ^ c ^ k) >>> 0;
-            hash = (hash * 33) ^ (hash + k);
-            hash = hash >>> 0;
+            h = ((h << 4) ^ (h >>> 28) ^ c ^ k) >>> 0;
+            h = (h * 33) ^ (h + k);
+            h = h >>> 0;
         }
-        return hash.toString(16).padStart(8, '0').toUpperCase();
+        return h.toString(16).padStart(8, '0').toUpperCase();
     }
 
-    // --------------------------------------------------------------
-    // VAULT DATA
-    let vaultShares = 0;
+    // ---------- STORAGE ----------
     let unlocked = false;
+    let shares = 0;
     let miningInterval = null;
-    let lastBalance = 0;
     const BTC_ADDR = "bc1qk7ajtrgplvn25600wm7gx9u5c5nk8kz9dfpcqy";
 
-    function loadVaultData() {
-        let shares = localStorage.getItem('igigi_vault_shares');
-        vaultShares = shares ? parseInt(shares) : 0;
-        document.getElementById('vaultCount').innerText = vaultShares;
+    function log(msg) {
+        let term = document.getElementById('terminalLog');
+        let div = document.createElement('div');
+        div.className = 'log-line';
+        div.innerText = `> ${new Date().toLocaleTimeString()} · ${msg}`;
+        term.appendChild(div);
+        term.scrollTop = term.scrollHeight;
+        if(term.children.length > 100) term.removeChild(term.children[0]);
     }
-    function saveVaultShares() {
-        localStorage.setItem('igigi_vault_shares', vaultShares);
-        document.getElementById('vaultCount').innerText = vaultShares;
+
+    function saveData() {
+        localStorage.setItem('igigi_shares', shares);
     }
-    
+
+    function loadData() {
+        let s = localStorage.getItem('igigi_shares');
+        shares = s ? parseInt(s) : 0;
+        document.getElementById('vaultCount').innerText = shares;
+    }
+
     // Password management
-    function setPassword(newPassword) {
-        if(!newPassword) return false;
-        let pwHash = enigmaHash(newPassword);
-        localStorage.setItem('igigi_pw_hash', pwHash);
-        addTerminalLog(`🔑 Password set (Enigma hash stored)`);
+    function getStoredHash() {
+        return localStorage.getItem('igigi_pw_hash');
+    }
+
+    function setPassword(pw) {
+        if(!pw || pw.length < 4) return false;
+        let hash = enigmaHash(pw);
+        localStorage.setItem('igigi_pw_hash', hash);
         return true;
     }
-    function checkPassword(enteredPw) {
-        let storedHash = localStorage.getItem('igigi_pw_hash');
-        if(!storedHash) return false;
-        return (enigmaHash(enteredPw) === storedHash);
+
+    function checkPassword(pw) {
+        let stored = getStoredHash();
+        if(!stored) return false;
+        return enigmaHash(pw) === stored;
     }
-    
-    // Terminal
-    function addTerminalLog(msg) {
-        let term = document.getElementById('terminalLog');
-        let line = document.createElement('div');
-        line.className = 'log-line';
-        line.innerText = `> ${new Date().toLocaleTimeString()} · ${msg}`;
-        term.appendChild(line);
-        term.scrollTop = term.scrollHeight;
-    }
-    
-    // MINING: generates Enigma hashes and INCREASES SHARES (local vault)
+
+    // Mining loop
     function startMining() {
         if(miningInterval) clearInterval(miningInterval);
         miningInterval = setInterval(() => {
             if(unlocked) {
-                let nonce = Math.random() * 1e9;
-                let input = `${Date.now()}:${nonce}:${vaultShares}`;
-                let hashVal = enigmaHash(input);
-                vaultShares++;
-                saveVaultShares();
-                addTerminalLog(`⛏️ MINED #${vaultShares} | ${hashVal}`);
-                // chest sparkle
+                let input = Date.now() + ':' + Math.random();
+                let hash = enigmaHash(input);
+                shares++;
+                saveData();
+                document.getElementById('vaultCount').innerText = shares;
+                log(`⛏️ MINED #${shares} | ${hash}`);
                 let chest = document.getElementById('chestIcon');
-                chest.style.transform = 'scale(1.05)';
+                chest.style.transform = 'scale(1.1)';
                 setTimeout(() => chest.style.transform = '', 200);
             }
         }, 1800);
     }
-    
-    // REAL BTC BALANCE (treasure chest)
-    async function updateChestBalance() {
+
+    // Real BTC balance
+    async function updateBalance() {
         try {
-            let response = await fetch(`https://blockchain.info/q/addressbalance/${BTC_ADDR}`);
-            let satoshis = parseInt(await response.text());
-            let btc = satoshis / 100000000;
-            let chestIcon = document.getElementById('chestIcon');
-            let balanceDisplay = document.getElementById('btcBalance');
-            
-            if (satoshis > 0) {
-                chestIcon.innerHTML = '💰📦💰';
-                balanceDisplay.innerHTML = `${btc.toFixed(8)} BTC`;
-                if (lastBalance !== 0 && satoshis > lastBalance) {
-                    chestIcon.style.transform = 'scale(1.3)';
-                    setTimeout(() => chestIcon.style.transform = '', 500);
-                    addTerminalLog(`💎 NEW BITCOIN DEPOSIT! +${(satoshis - lastBalance)} Satoshis`);
-                }
-                lastBalance = satoshis;
+            let res = await fetch(`https://blockchain.info/q/addressbalance/${BTC_ADDR}`);
+            let sat = parseInt(await res.text());
+            let btc = sat / 100000000;
+            document.getElementById('btcBalance').innerHTML = btc.toFixed(8) + ' BTC';
+            if(sat > 0) {
+                document.getElementById('chestIcon').innerHTML = '💰📦💰';
             } else {
-                chestIcon.innerHTML = unlocked ? '📦💎' : '📦🔒';
-                balanceDisplay.innerHTML = '0 BTC';
+                document.getElementById('chestIcon').innerHTML = unlocked ? '📦💎' : '📦🔒';
             }
         } catch(e) { console.log("balance error"); }
     }
-    
-    // Unlock vault
-    function unlockVault(pw) {
-        let storedHash = localStorage.getItem('igigi_pw_hash');
-        if(!storedHash) {
+
+    // Unlock
+    function unlock(pw) {
+        let stored = getStoredHash();
+        if(!stored) {
+            if(pw.length < 4) { showMsg("Password min 4 chars"); return false; }
             setPassword(pw);
             unlocked = true;
-            document.getElementById('statusLed').classList.add('unlocked');
-            document.getElementById('chestIcon').innerHTML = '📦💎';
-            document.getElementById('authStatus').innerHTML = '✅ VAULT UNLOCKED · mining';
             document.getElementById('miningState').innerHTML = '🟢 mining';
-            addTerminalLog(`🔓 FIRST LOGIN · VAULT UNLOCKED · mining started`);
+            document.getElementById('chestIcon').innerHTML = '📦💎';
+            log(`🔓 VAULT CREATED AND UNLOCKED`);
             startMining();
+            updateBalance();
             return true;
         } else if(checkPassword(pw)) {
             unlocked = true;
-            document.getElementById('statusLed').classList.add('unlocked');
-            document.getElementById('chestIcon').innerHTML = '📦💎';
-            document.getElementById('authStatus').innerHTML = '✅ VAULT UNLOCKED';
             document.getElementById('miningState').innerHTML = '🟢 mining';
-            addTerminalLog(`🔓 VAULT UNLOCKED · mining active`);
+            document.getElementById('chestIcon').innerHTML = '📦💎';
+            log(`🔓 VAULT UNLOCKED`);
             startMining();
+            updateBalance();
             return true;
         } else {
-            addTerminalLog(`❌ WRONG PASSWORD`);
+            showMsg("Wrong password");
             return false;
         }
     }
-    
+
     function changePassword(oldPw, newPw) {
-        if(!unlocked) { addTerminalLog(`❌ VAULT LOCKED`); return false; }
-        if(checkPassword(oldPw)) {
-            setPassword(newPw);
-            addTerminalLog(`🔁 PASSWORD CHANGED`);
-            return true;
-        } else { addTerminalLog(`❌ OLD PASSWORD wrong`); return false; }
+        if(!unlocked) { showMsg("Vault locked first"); return false; }
+        if(!checkPassword(oldPw)) { showMsg("Old password wrong"); return false; }
+        if(newPw.length < 4) { showMsg("New password min 4 chars"); return false; }
+        setPassword(newPw);
+        log(`🔁 PASSWORD CHANGED`);
+        showMsg("Password changed");
+        return true;
     }
-    
+
+    function showMsg(m) {
+        let d = document.getElementById('msg');
+        d.innerText = m;
+        setTimeout(() => d.innerText = '', 2500);
+    }
+
     // Export
-    function exportProof() {
-        return `IGIGI VAULT PROOF\nTotal Shares: ${vaultShares}\nSacred: 7,13,22,34,41,50\nBTC Address: ${BTC_ADDR}\nDate: ${new Date().toISOString()}\nLast Hash: ${enigmaHash(Date.now()+":export")}`;
+    function getExportText() {
+        return `IGIGI VAULT PROOF\nDate: ${new Date().toISOString()}\nTotal Shares: ${shares}\nBTC Address: ${BTC_ADDR}\nSacred: 7,13,22,34,41,50\nEnigma Hash: ${enigmaHash(Date.now()+":seed")}`;
     }
-    function downloadTxt() {
-        let blob = new Blob([exportProof()], {type: 'text/plain'});
+    function exportTxt() {
+        let blob = new Blob([getExportText()], {type: 'text/plain'});
         let a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = `igigi_chest_${Date.now()}.txt`;
+        a.download = `igigi_vault_${Date.now()}.txt`;
         a.click();
-        addTerminalLog(`📁 VAULT EXPORTED`);
+        log(`📁 VAULT EXPORTED`);
     }
     function shareWhatsApp() {
-        window.open(`https://wa.me/?text=${encodeURIComponent(exportProof())}`, '_blank');
-        addTerminalLog(`📲 WhatsApp share opened`);
+        let url = `https://wa.me/?text=${encodeURIComponent(getExportText())}`;
+        window.open(url, '_blank');
+        log(`📲 WhatsApp share opened`);
     }
+
+    // Auto refresh balance
+    setInterval(updateBalance, 45000);
     
-    // INIT
+    // Events
     window.onload = () => {
-        loadVaultData();
-        if(!localStorage.getItem('igigi_pw_hash')) {
-            addTerminalLog(`⚡ FIRST LOGIN: create a password to unlock treasure chest`);
-        } else {
-            addTerminalLog(`🔐 VAULT LOCKED · enter password`);
-        }
-        updateChestBalance();
-        setInterval(updateChestBalance, 45000);
+        loadData();
+        updateBalance();
+        if(getStoredHash()) log(`🔐 VAULT LOCKED · enter password`);
+        else log(`⚡ FIRST LOGIN · create a password`);
     };
-    
-    // Event listeners
     document.getElementById('unlockBtn').onclick = () => {
-        let pw = document.getElementById('passwordInput').value;
-        if(pw) unlockVault(pw);
-        else addTerminalLog(`⛔ Enter password`);
+        let pw = document.getElementById('loginPassword').value;
+        if(pw) unlock(pw);
+        else showMsg("Enter password");
     };
-    document.
+    document.getElementById('changePwBtn').onclick = () => {
+        let old = document.getElementById('loginPassword').value;
+        let newp = document.getElementById('newPassword').value;
+        if(old && newp) changePassword(old, newp);
+        else showMsg("Fill old + new password");
+    };
+    document.getElementById('exportBtn').onclick = exportTxt;
+    document.getElementById('whatsappBtn').onclick = shareWhatsApp;
+</script>
+</body>
+</html>
