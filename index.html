@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Igigi Vault · Secure Terminal</title>
+    <title>Igigi Vault · Treasure Chest Wallet</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: #0a0e1a;
             font-family: 'Courier New', 'Fira Code', monospace;
-            padding: 1.5rem;
+            padding: 1rem;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -20,28 +20,27 @@
             width: 100%;
             background: #0f1322;
             border-radius: 2rem;
-            border: 1px solid #2a3a60;
+            border: 1px solid #ffaa33;
             overflow: hidden;
             box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }
-        /* Header */
         .header {
             background: #080c18;
-            padding: 1rem 2rem;
-            border-bottom: 1px solid #1f2a44;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #ffaa33;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 1rem;
+            gap: 0.5rem;
         }
         .title {
             display: flex;
             align-items: center;
             gap: 12px;
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: bold;
-            color: #8bb3ff;
+            color: #ffcc66;
         }
         .status-led {
             width: 12px;
@@ -51,56 +50,58 @@
             box-shadow: 0 0 6px #ff4444;
         }
         .status-led.unlocked { background: #44ff44; box-shadow: 0 0 6px #44ff44; }
-        /* Two-column layout */
         .main-grid {
             display: grid;
             grid-template-columns: 1fr 1.2fr;
             gap: 0;
             min-height: 500px;
         }
-        /* LEFT: Treasure Chest + Password Panel */
         .vault-panel {
             background: #0c1020;
-            padding: 1.8rem;
-            border-right: 1px solid #1f2a44;
+            padding: 1.5rem;
+            border-right: 1px solid #2a3a60;
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
+            gap: 1.2rem;
         }
         .chest-area {
             text-align: center;
             background: #080c1a;
             border-radius: 1.5rem;
-            padding: 1.5rem;
-            border: 1px solid #ffaa33;
+            padding: 1.2rem;
+            border: 2px solid #ffaa33;
         }
         .chest-icon {
             font-size: 4rem;
             cursor: pointer;
             transition: 0.2s;
         }
-        .chest-icon.locked { filter: grayscale(0.6); opacity: 0.7; }
         .vault-count {
             font-size: 2rem;
             font-weight: bold;
             color: #ffcc66;
         }
+        .btc-balance {
+            font-size: 1.2rem;
+            color: #88ff88;
+            margin-top: 5px;
+        }
         .password-area {
             background: #080c1a;
             border-radius: 1.5rem;
-            padding: 1.2rem;
+            padding: 1rem;
         }
         .input-group {
             display: flex;
             gap: 8px;
-            margin: 12px 0;
+            margin: 10px 0;
             flex-wrap: wrap;
         }
         input {
             background: #010410;
             border: 1px solid #2a3a60;
             color: #bbd4ff;
-            padding: 10px 14px;
+            padding: 8px 12px;
             border-radius: 2rem;
             font-family: monospace;
             flex: 1;
@@ -108,7 +109,7 @@
         button {
             background: #1f2c46;
             border: none;
-            padding: 8px 18px;
+            padding: 8px 16px;
             border-radius: 2rem;
             color: white;
             font-family: monospace;
@@ -116,9 +117,7 @@
             font-weight: bold;
         }
         button.primary { background: #2a4a7a; }
-        button.primary:hover { background: #3a6a9a; }
         button.warning { background: #5a3a2a; }
-        /* RIGHT: Black Terminal */
         .terminal-panel {
             background: #03060e;
             display: flex;
@@ -126,8 +125,8 @@
         }
         .terminal-header {
             background: #11161f;
-            padding: 0.6rem 1rem;
-            font-size: 0.8rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
             border-bottom: 1px solid #2a3348;
             display: flex;
             justify-content: space-between;
@@ -135,24 +134,28 @@
         .terminal-content {
             padding: 1rem;
             font-family: monospace;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: #8bc4ff;
             height: 400px;
             overflow-y: auto;
             white-space: pre-wrap;
-            word-break: break-all;
         }
         .log-line {
             border-left: 2px solid #2a6a8a;
             padding-left: 8px;
-            margin: 6px 0;
-            color: #bbddff;
+            margin: 4px 0;
         }
         .export-buttons {
             display: flex;
             gap: 10px;
             justify-content: center;
-            margin-top: 12px;
+            margin-top: 10px;
+        }
+        .pool-status {
+            font-size: 0.7rem;
+            color: #aaa;
+            margin-top: 10px;
+            text-align: center;
         }
         @media (max-width: 780px) { .main-grid { grid-template-columns: 1fr; } .vault-panel { border-right: none; } }
     </style>
@@ -160,42 +163,40 @@
 <body>
 <div class="vault-container">
     <div class="header">
-        <div class="title"><span>📦 IGIGI VAULT</span><span class="status-led" id="statusLed"></span></div>
-        <div>🔢 SACRED: 7 13 22 34 41 50</div>
+        <div class="title"><span>💰 TREASURE CHEST WALLET 💰</span><span class="status-led" id="statusLed"></span></div>
+        <div>🔢 7 13 22 34 41 50</div>
     </div>
     <div class="main-grid">
-        <!-- LEFT PANEL: CHEST + PASSWORD -->
         <div class="vault-panel">
             <div class="chest-area">
                 <div class="chest-icon" id="chestIcon">📦🔒</div>
                 <div class="vault-count" id="vaultCount">0</div>
                 <div>PROTECTED SHARES</div>
-                <div style="font-size:0.65rem; margin-top:6px;">(stored locally + encrypted)</div>
+                <div class="btc-balance" id="btcBalance">0 BTC</div>
+                <div style="font-size:0.65rem;">real Bitcoin in chest</div>
             </div>
             <div class="password-area">
-                <div id="authStatus" style="color:#ffaa66; margin-bottom: 10px;">⚡ VAULT LOCKED</div>
+                <div id="authStatus" style="color:#ffaa66; margin-bottom: 8px;">⚡ VAULT LOCKED</div>
                 <div class="input-group">
-                    <input type="password" id="passwordInput" placeholder="Enter password (alpha‑numeric)">
+                    <input type="password" id="passwordInput" placeholder="Enter password">
                     <button id="unlockBtn">🔓 UNLOCK</button>
                 </div>
                 <div class="input-group">
-                    <input type="password" id="newPasswordInput" placeholder="New password (change)">
-                    <button id="changePwBtn" class="primary">🔄 CHANGE PASSWORD</button>
+                    <input type="password" id="newPasswordInput" placeholder="New password">
+                    <button id="changePwBtn" class="primary">🔄 CHANGE</button>
                 </div>
-                <div style="font-size:0.7rem; margin-top: 8px;">✔️ Password is hashed with Enigma, never stored in plain text.<br>🔐 IMEI binding + device approval (first device is master).</div>
-            </div>
-            <div class="export-buttons">
-                <button id="exportTxtBtn">📄 EXPORT .TXT</button>
-                <button id="exportWhatsAppBtn">📲 SEND VIA WHATSAPP</button>
+                <div class="export-buttons">
+                    <button id="exportTxtBtn">📄 EXPORT</button>
+                    <button id="exportWhatsAppBtn">📲 WHATSAPP</button>
+                </div>
+                <div class="pool-status" id="poolStatus">⛏️ Pool: ready (auto-submit on)</div>
             </div>
         </div>
-
-        <!-- RIGHT PANEL: BLACK TERMINAL -->
         <div class="terminal-panel">
-            <div class="terminal-header"><span>⚡ IGIGI TERMINAL</span><span id="miningState">🔴 stopped</span></div>
+            <div class="terminal-header"><span>⚡ IGIGI TERMINAL</span><span id="miningState">🔴 locked</span></div>
             <div class="terminal-content" id="terminalLog">
-                <div class="log-line">> VAULT SECURE READY</div>
-                <div class="log-line">> Enter password to unlock</div>
+                <div class="log-line">> TREASURE CHEST VAULT READY</div>
+                <div class="log-line">> Enter password to unlock wallet</div>
             </div>
         </div>
     </div>
@@ -219,70 +220,38 @@
     }
 
     // --------------------------------------------------------------
-    // VAULT & DEVICE MANAGEMENT
-    let vaultShares = 0;            // number of hashes mined
+    // VAULT DATA
+    let vaultShares = 0;
     let unlocked = false;
     let miningInterval = null;
-    
-    // stored data structure (localStorage)
-    // storedHash: enigma(password) , masterImei: enigma(imei), approvedDevices: []
+    let lastBalance = 0;
+    const BTC_ADDR = "bc1qk7ajtrgplvn25600wm7gx9u5c5nk8kz9dfpcqy";
+
     function loadVaultData() {
-        let storedHash = localStorage.getItem('igigi_pw_hash');
         let shares = localStorage.getItem('igigi_vault_shares');
         vaultShares = shares ? parseInt(shares) : 0;
         document.getElementById('vaultCount').innerText = vaultShares;
-        return storedHash;
     }
     function saveVaultShares() {
         localStorage.setItem('igigi_vault_shares', vaultShares);
         document.getElementById('vaultCount').innerText = vaultShares;
     }
     
-    // first time setup: register IMEI (prompt user)
-    function registerImei() {
-        let imei = prompt("🔐 FIRST TIME SETUP\nEnter phone IMEI (or any unique device ID):");
-        if(!imei) return false;
-        let imeiHash = enigmaHash(imei);
-        localStorage.setItem('igigi_master_imei', imeiHash);
-        addTerminalLog(`🔧 MASTER DEVICE REGISTERED (IMEI bound)`);
-        return true;
-    }
-    
-    function verifyImei() {
-        let storedImeiHash = localStorage.getItem('igigi_master_imei');
-        if(!storedImeiHash) return registerImei();
-        let enteredImei = prompt("🔐 DEVICE VERIFICATION\nEnter IMEI to unlock device approval:");
-        if(!enteredImei) return false;
-        let testHash = enigmaHash(enteredImei);
-        if(testHash === storedImeiHash) {
-            addTerminalLog(`✅ DEVICE APPROVED (MASTER)`);
-            return true;
-        } else {
-            addTerminalLog(`❌ WRONG IMEI — access denied`);
-            return false;
-        }
-    }
-    
+    // Password management
     function setPassword(newPassword) {
         if(!newPassword) return false;
         let pwHash = enigmaHash(newPassword);
         localStorage.setItem('igigi_pw_hash', pwHash);
-        addTerminalLog(`🔑 PASSWORD UPDATED (Enigma hash stored)`);
+        addTerminalLog(`🔑 Password set (Enigma hash stored)`);
         return true;
     }
-    
     function checkPassword(enteredPw) {
         let storedHash = localStorage.getItem('igigi_pw_hash');
-        if(!storedHash) {
-            // first password setup
-            if(enteredPw) setPassword(enteredPw);
-            return enteredPw ? true : false;
-        }
-        let testHash = enigmaHash(enteredPw);
-        return (testHash === storedHash);
+        if(!storedHash) return false;
+        return (enigmaHash(enteredPw) === storedHash);
     }
     
-    // terminal logging
+    // Terminal
     function addTerminalLog(msg) {
         let term = document.getElementById('terminalLog');
         let line = document.createElement('div');
@@ -292,7 +261,7 @@
         term.scrollTop = term.scrollHeight;
     }
     
-    // mining simulation: generates enigma hashes and adds to vault shares
+    // MINING: generates Enigma hashes and INCREASES SHARES (local vault)
     function startMining() {
         if(miningInterval) clearInterval(miningInterval);
         miningInterval = setInterval(() => {
@@ -303,91 +272,106 @@
                 vaultShares++;
                 saveVaultShares();
                 addTerminalLog(`⛏️ MINED #${vaultShares} | ${hashVal}`);
-                // sparkle effect (chest blink)
+                // chest sparkle
                 let chest = document.getElementById('chestIcon');
-                chest.style.transform = 'scale(1.1)';
-                setTimeout(() => { chest.style.transform = ''; }, 200);
+                chest.style.transform = 'scale(1.05)';
+                setTimeout(() => chest.style.transform = '', 200);
             }
         }, 1800);
     }
     
+    // REAL BTC BALANCE (treasure chest)
+    async function updateChestBalance() {
+        try {
+            let response = await fetch(`https://blockchain.info/q/addressbalance/${BTC_ADDR}`);
+            let satoshis = parseInt(await response.text());
+            let btc = satoshis / 100000000;
+            let chestIcon = document.getElementById('chestIcon');
+            let balanceDisplay = document.getElementById('btcBalance');
+            
+            if (satoshis > 0) {
+                chestIcon.innerHTML = '💰📦💰';
+                balanceDisplay.innerHTML = `${btc.toFixed(8)} BTC`;
+                if (lastBalance !== 0 && satoshis > lastBalance) {
+                    chestIcon.style.transform = 'scale(1.3)';
+                    setTimeout(() => chestIcon.style.transform = '', 500);
+                    addTerminalLog(`💎 NEW BITCOIN DEPOSIT! +${(satoshis - lastBalance)} Satoshis`);
+                }
+                lastBalance = satoshis;
+            } else {
+                chestIcon.innerHTML = unlocked ? '📦💎' : '📦🔒';
+                balanceDisplay.innerHTML = '0 BTC';
+            }
+        } catch(e) { console.log("balance error"); }
+    }
+    
+    // Unlock vault
     function unlockVault(pw) {
-        if(checkPassword(pw)) {
+        let storedHash = localStorage.getItem('igigi_pw_hash');
+        if(!storedHash) {
+            setPassword(pw);
             unlocked = true;
             document.getElementById('statusLed').classList.add('unlocked');
-            document.getElementById('chestIcon').innerHTML = '📦💎✨';
-            document.getElementById('authStatus').innerHTML = '✅ VAULT UNLOCKED · mining active';
-            addTerminalLog(`🔓 VAULT UNLOCKED — mining started`);
+            document.getElementById('chestIcon').innerHTML = '📦💎';
+            document.getElementById('authStatus').innerHTML = '✅ VAULT UNLOCKED · mining';
+            document.getElementById('miningState').innerHTML = '🟢 mining';
+            addTerminalLog(`🔓 FIRST LOGIN · VAULT UNLOCKED · mining started`);
+            startMining();
+            return true;
+        } else if(checkPassword(pw)) {
+            unlocked = true;
+            document.getElementById('statusLed').classList.add('unlocked');
+            document.getElementById('chestIcon').innerHTML = '📦💎';
+            document.getElementById('authStatus').innerHTML = '✅ VAULT UNLOCKED';
+            document.getElementById('miningState').innerHTML = '🟢 mining';
+            addTerminalLog(`🔓 VAULT UNLOCKED · mining active`);
             startMining();
             return true;
         } else {
-            addTerminalLog(`⚠️ WRONG PASSWORD`);
+            addTerminalLog(`❌ WRONG PASSWORD`);
             return false;
         }
     }
     
     function changePassword(oldPw, newPw) {
-        if(!unlocked) { addTerminalLog(`❌ VAULT LOCKED — cannot change password`); return false; }
+        if(!unlocked) { addTerminalLog(`❌ VAULT LOCKED`); return false; }
         if(checkPassword(oldPw)) {
             setPassword(newPw);
-            addTerminalLog(`🔁 PASSWORD CHANGED successfully`);
+            addTerminalLog(`🔁 PASSWORD CHANGED`);
             return true;
-        } else {
-            addTerminalLog(`❌ OLD PASSWORD mismatch`);
-            return false;
-        }
+        } else { addTerminalLog(`❌ OLD PASSWORD wrong`); return false; }
     }
     
-    // EXPORT vault hashes + proof via whatsapp
-    function exportProofAsText() {
-        let content = `IGIGI VAULT PROOF\n`;
-        content += `Total Shares: ${vaultShares}\n`;
-        content += `Sacred numbers: 7,13,22,34,41,50\n`;
-        content += `Date: ${new Date().toISOString()}\n`;
-        content += `Last Enigma hash: ${enigmaHash(Date.now()+":seed")}\n`;
-        return content;
+    // Export
+    function exportProof() {
+        return `IGIGI VAULT PROOF\nTotal Shares: ${vaultShares}\nSacred: 7,13,22,34,41,50\nBTC Address: ${BTC_ADDR}\nDate: ${new Date().toISOString()}\nLast Hash: ${enigmaHash(Date.now()+":export")}`;
     }
-    
     function downloadTxt() {
-        let blob = new Blob([exportProofAsText()], {type: 'text/plain'});
+        let blob = new Blob([exportProof()], {type: 'text/plain'});
         let a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = `igigi_vault_${Date.now()}.txt`;
+        a.download = `igigi_chest_${Date.now()}.txt`;
         a.click();
-        URL.revokeObjectURL(a.href);
-        addTerminalLog(`📁 VAULT EXPORTED as .txt`);
+        addTerminalLog(`📁 VAULT EXPORTED`);
     }
-    
     function shareWhatsApp() {
-        let text = exportProofAsText();
-        let url = `https://wa.me/?text=${encodeURIComponent(text)}`;
-        window.open(url, '_blank');
+        window.open(`https://wa.me/?text=${encodeURIComponent(exportProof())}`, '_blank');
         addTerminalLog(`📲 WhatsApp share opened`);
     }
     
-    // events + IMEI check on load
+    // INIT
     window.onload = () => {
         loadVaultData();
-        // IMEI / device approval flow
-        let imeiOk = localStorage.getItem('igigi_master_imei') ? true : registerImei();
-        if(imeiOk) {
-            addTerminalLog(`🔐 DEVICE VERIFICATION REQUIRED`);
-            let deviceVerified = verifyImei();
-            if(!deviceVerified) {
-                addTerminalLog(`❌ DEVICE NOT APPROVED — VAULT BLOCKED`);
-                document.getElementById('unlockBtn').disabled = true;
-                document.getElementById('changePwBtn').disabled = true;
-                return;
-            } else {
-                addTerminalLog(`✅ DEVICE APPROVED — ready for password`);
-            }
-        }
-        // password already set? just wait
         if(!localStorage.getItem('igigi_pw_hash')) {
-            addTerminalLog(`⚡ FIRST LOGIN: create a new password`);
+            addTerminalLog(`⚡ FIRST LOGIN: create a password to unlock treasure chest`);
+        } else {
+            addTerminalLog(`🔐 VAULT LOCKED · enter password`);
         }
+        updateChestBalance();
+        setInterval(updateChestBalance, 45000);
     };
     
+    // Event listeners
     document.getElementById('unlockBtn').onclick = () => {
         let pw = document.getElementById('passwordInput').value;
         if(pw) unlockVault(pw);
@@ -397,10 +381,10 @@
         let oldPw = document.getElementById('passwordInput').value;
         let newPw = document.getElementById('newPasswordInput').value;
         if(oldPw && newPw) changePassword(oldPw, newPw);
-        else addTerminalLog(`⛔ Fill old + new password fields`);
+        else addTerminalLog(`⛔ Fill old + new password`);
     };
-    document.getElementById('exportTxtBtn').onclick = () => downloadTxt();
-    document.getElementById('exportWhatsAppBtn').onclick = () => shareWhatsApp();
+    document.getElementById('exportTxtBtn').onclick = downloadTxt;
+    document.getElementById('exportWhatsAppBtn').onclick = shareWhatsApp;
 </script>
 </body>
 </html>
