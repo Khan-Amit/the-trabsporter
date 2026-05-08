@@ -1,0 +1,183 @@
+cd ~/igigi
+cat > sparkle.html << 'EOF'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Igigi · Sparkle Hashes</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: radial-gradient(circle at 20% 30%, #0a0f1e, #03060c);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Inter', monospace;
+            padding: 1.5rem;
+        }
+        .glass-panel {
+            background: rgba(12, 18, 28, 0.65);
+            backdrop-filter: blur(14px);
+            border-radius: 3rem;
+            border: 1px solid rgba(90, 150, 255, 0.25);
+            padding: 2rem;
+            width: 100%;
+            max-width: 1000px;
+        }
+        h1 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #f0f3ff, #8bb3ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .canvas-container {
+            background: #01050e;
+            border-radius: 2rem;
+            padding: 4px;
+            border: 1px solid #2a4170;
+            margin: 1.5rem 0;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            background: #040a14;
+            border-radius: 1.5rem;
+            cursor: pointer;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            background: #0b111c80;
+            padding: 1rem;
+            border-radius: 2rem;
+        }
+        .stat-card {
+            background: #0f1624;
+            padding: 0.5rem 1.2rem;
+            border-radius: 2rem;
+            border: 1px solid #2b3f68;
+            font-family: monospace;
+        }
+        button {
+            background: #1f2c46;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 2rem;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover { background: #2b3d64; }
+    </style>
+</head>
+<body>
+<div class="glass-panel">
+    <h1>✨ IGIGI · SPARKLE HASHES</h1>
+    <div class="canvas-container">
+        <canvas id="hashCanvas" width="900" height="280" style="width:100%; aspect-ratio:900/280"></canvas>
+    </div>
+    <div class="stats">
+        <div class="stat-card">🌊 SHARES: <span id="hashCounter">0</span></div>
+        <div class="stat-card">💎 HASH: <span id="currentHash">—</span></div>
+        <div class="stat-card">🔢 7 13 22 34 41 50</div>
+    </div>
+    <button id="resetBtn">🌀 new seed</button>
+</div>
+<script>
+    const SACRED = [7, 13, 22, 34, 41, 50];
+    const GOLDEN = 0x9E3779B9;
+    
+    function enigmaHash(input) {
+        let hash = GOLDEN >>> 0;
+        for (let i = 0; i < input.length; i++) {
+            let c = input.charCodeAt(i);
+            let k = SACRED[i % SACRED.length];
+            hash = ((hash << 4) ^ (hash >>> 28) ^ c ^ k) >>> 0;
+            hash = (hash * 33) ^ (hash + k);
+            hash = hash >>> 0;
+        }
+        return hash.toString(16).padStart(8, '0').toUpperCase();
+    }
+    
+    const canvas = document.getElementById('hashCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 900; canvas.height = 280;
+    
+    let shares = 0;
+    let currentHash = "ENIGMA";
+    let particles = [];
+    
+    function hashToColor(h) {
+        let v = parseInt(h.substring(0,6), 16);
+        return `rgb(${(v>>16)&255}, ${(v>>8)&255}, ${v&255})`;
+    }
+    
+    function draw() {
+        ctx.fillStyle = '#040a14';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // center glow
+        let color = hashToColor(currentHash);
+        ctx.globalAlpha = 0.3;
+        ctx.beginPath();
+        ctx.arc(canvas.width/2, canvas.height/2, 50, 0, Math.PI*2);
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        
+        ctx.font = 'bold 24px monospace';
+        ctx.fillStyle = '#bbd4ff';
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = color;
+        ctx.fillText(currentHash, canvas.width/2 - 110, canvas.height/2 + 10);
+        ctx.shadowBlur = 0;
+        
+        for(let p of particles) {
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+            ctx.fill();
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life -= 0.02;
+            p.size *= 0.98;
+        }
+        particles = particles.filter(p => p.life > 0);
+        requestAnimationFrame(draw);
+    }
+    
+    function newSparkle() {
+        let input = Date.now() + ':' + Math.random() + ':' + shares;
+        currentHash = enigmaHash(input);
+        shares++;
+        document.getElementById('hashCounter').innerText = shares;
+        document.getElementById('currentHash').innerText = currentHash;
+        
+        let color = hashToColor(currentHash);
+        for(let i=0;i<30;i++) {
+            particles.push({
+                x: canvas.width/2 + (Math.random()-0.5)*100,
+                y: canvas.height/2 + (Math.random()-0.5)*80,
+                vx: (Math.random()-0.5)*3,
+                vy: (Math.random()-0.5)*3 - 1,
+                size: 4 + Math.random()*8,
+                life: 1,
+                color: color
+            });
+        }
+    }
+    
+    document.getElementById('resetBtn').onclick = () => { shares = 0; newSparkle(); };
+    canvas.onclick = () => newSparkle();
+    
+    setInterval(newSparkle, 700);
+    newSparkle();
+    draw();
+</script>
+</body>
+</html>
+EOF
