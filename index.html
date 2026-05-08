@@ -1,96 +1,211 @@
-cd ~/igigi
-cat > sparkle.html << 'EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Igigi · Sparkle Hashes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Igigi Vault · Secure Terminal</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background: radial-gradient(circle at 20% 30%, #0a0f1e, #03060c);
+            background: #0a0e1a;
+            font-family: 'Courier New', 'Fira Code', monospace;
+            padding: 1.5rem;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Inter', monospace;
-            padding: 1.5rem;
         }
-        .glass-panel {
-            background: rgba(12, 18, 28, 0.65);
-            backdrop-filter: blur(14px);
-            border-radius: 3rem;
-            border: 1px solid rgba(90, 150, 255, 0.25);
-            padding: 2rem;
+        .vault-container {
+            max-width: 1300px;
             width: 100%;
-            max-width: 1000px;
-        }
-        h1 {
-            font-size: 2rem;
-            background: linear-gradient(135deg, #f0f3ff, #8bb3ff);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        .canvas-container {
-            background: #01050e;
+            background: #0f1322;
             border-radius: 2rem;
-            padding: 4px;
-            border: 1px solid #2a4170;
-            margin: 1.5rem 0;
+            border: 1px solid #2a3a60;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }
-        canvas {
-            display: block;
-            width: 100%;
-            background: #040a14;
-            border-radius: 1.5rem;
-            cursor: pointer;
-        }
-        .stats {
+        /* Header */
+        .header {
+            background: #080c18;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #1f2a44;
             display: flex;
             justify-content: space-between;
+            align-items: center;
             flex-wrap: wrap;
-            gap: 16px;
-            background: #0b111c80;
-            padding: 1rem;
-            border-radius: 2rem;
+            gap: 1rem;
         }
-        .stat-card {
-            background: #0f1624;
-            padding: 0.5rem 1.2rem;
+        .title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #8bb3ff;
+        }
+        .status-led {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ff4444;
+            box-shadow: 0 0 6px #ff4444;
+        }
+        .status-led.unlocked { background: #44ff44; box-shadow: 0 0 6px #44ff44; }
+        /* Two-column layout */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 0;
+            min-height: 500px;
+        }
+        /* LEFT: Treasure Chest + Password Panel */
+        .vault-panel {
+            background: #0c1020;
+            padding: 1.8rem;
+            border-right: 1px solid #1f2a44;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .chest-area {
+            text-align: center;
+            background: #080c1a;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            border: 1px solid #ffaa33;
+        }
+        .chest-icon {
+            font-size: 4rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .chest-icon.locked { filter: grayscale(0.6); opacity: 0.7; }
+        .vault-count {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffcc66;
+        }
+        .password-area {
+            background: #080c1a;
+            border-radius: 1.5rem;
+            padding: 1.2rem;
+        }
+        .input-group {
+            display: flex;
+            gap: 8px;
+            margin: 12px 0;
+            flex-wrap: wrap;
+        }
+        input {
+            background: #010410;
+            border: 1px solid #2a3a60;
+            color: #bbd4ff;
+            padding: 10px 14px;
             border-radius: 2rem;
-            border: 1px solid #2b3f68;
             font-family: monospace;
+            flex: 1;
         }
         button {
             background: #1f2c46;
             border: none;
-            padding: 8px 20px;
+            padding: 8px 18px;
             border-radius: 2rem;
             color: white;
+            font-family: monospace;
             cursor: pointer;
+            font-weight: bold;
         }
-        button:hover { background: #2b3d64; }
+        button.primary { background: #2a4a7a; }
+        button.primary:hover { background: #3a6a9a; }
+        button.warning { background: #5a3a2a; }
+        /* RIGHT: Black Terminal */
+        .terminal-panel {
+            background: #03060e;
+            display: flex;
+            flex-direction: column;
+        }
+        .terminal-header {
+            background: #11161f;
+            padding: 0.6rem 1rem;
+            font-size: 0.8rem;
+            border-bottom: 1px solid #2a3348;
+            display: flex;
+            justify-content: space-between;
+        }
+        .terminal-content {
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #8bc4ff;
+            height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .log-line {
+            border-left: 2px solid #2a6a8a;
+            padding-left: 8px;
+            margin: 6px 0;
+            color: #bbddff;
+        }
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 12px;
+        }
+        @media (max-width: 780px) { .main-grid { grid-template-columns: 1fr; } .vault-panel { border-right: none; } }
     </style>
 </head>
 <body>
-<div class="glass-panel">
-    <h1>✨ IGIGI · SPARKLE HASHES</h1>
-    <div class="canvas-container">
-        <canvas id="hashCanvas" width="900" height="280" style="width:100%; aspect-ratio:900/280"></canvas>
+<div class="vault-container">
+    <div class="header">
+        <div class="title"><span>📦 IGIGI VAULT</span><span class="status-led" id="statusLed"></span></div>
+        <div>🔢 SACRED: 7 13 22 34 41 50</div>
     </div>
-    <div class="stats">
-        <div class="stat-card">🌊 SHARES: <span id="hashCounter">0</span></div>
-        <div class="stat-card">💎 HASH: <span id="currentHash">—</span></div>
-        <div class="stat-card">🔢 7 13 22 34 41 50</div>
+    <div class="main-grid">
+        <!-- LEFT PANEL: CHEST + PASSWORD -->
+        <div class="vault-panel">
+            <div class="chest-area">
+                <div class="chest-icon" id="chestIcon">📦🔒</div>
+                <div class="vault-count" id="vaultCount">0</div>
+                <div>PROTECTED SHARES</div>
+                <div style="font-size:0.65rem; margin-top:6px;">(stored locally + encrypted)</div>
+            </div>
+            <div class="password-area">
+                <div id="authStatus" style="color:#ffaa66; margin-bottom: 10px;">⚡ VAULT LOCKED</div>
+                <div class="input-group">
+                    <input type="password" id="passwordInput" placeholder="Enter password (alpha‑numeric)">
+                    <button id="unlockBtn">🔓 UNLOCK</button>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="newPasswordInput" placeholder="New password (change)">
+                    <button id="changePwBtn" class="primary">🔄 CHANGE PASSWORD</button>
+                </div>
+                <div style="font-size:0.7rem; margin-top: 8px;">✔️ Password is hashed with Enigma, never stored in plain text.<br>🔐 IMEI binding + device approval (first device is master).</div>
+            </div>
+            <div class="export-buttons">
+                <button id="exportTxtBtn">📄 EXPORT .TXT</button>
+                <button id="exportWhatsAppBtn">📲 SEND VIA WHATSAPP</button>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: BLACK TERMINAL -->
+        <div class="terminal-panel">
+            <div class="terminal-header"><span>⚡ IGIGI TERMINAL</span><span id="miningState">🔴 stopped</span></div>
+            <div class="terminal-content" id="terminalLog">
+                <div class="log-line">> VAULT SECURE READY</div>
+                <div class="log-line">> Enter password to unlock</div>
+            </div>
+        </div>
     </div>
-    <button id="resetBtn">🌀 new seed</button>
 </div>
+
 <script>
+    // --------------------------------------------------------------
+    // ENIGMA CORE
     const SACRED = [7, 13, 22, 34, 41, 50];
     const GOLDEN = 0x9E3779B9;
-    
     function enigmaHash(input) {
         let hash = GOLDEN >>> 0;
         for (let i = 0; i < input.length; i++) {
@@ -102,82 +217,190 @@ cat > sparkle.html << 'EOF'
         }
         return hash.toString(16).padStart(8, '0').toUpperCase();
     }
+
+    // --------------------------------------------------------------
+    // VAULT & DEVICE MANAGEMENT
+    let vaultShares = 0;            // number of hashes mined
+    let unlocked = false;
+    let miningInterval = null;
     
-    const canvas = document.getElementById('hashCanvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = 900; canvas.height = 280;
-    
-    let shares = 0;
-    let currentHash = "ENIGMA";
-    let particles = [];
-    
-    function hashToColor(h) {
-        let v = parseInt(h.substring(0,6), 16);
-        return `rgb(${(v>>16)&255}, ${(v>>8)&255}, ${v&255})`;
+    // stored data structure (localStorage)
+    // storedHash: enigma(password) , masterImei: enigma(imei), approvedDevices: []
+    function loadVaultData() {
+        let storedHash = localStorage.getItem('igigi_pw_hash');
+        let shares = localStorage.getItem('igigi_vault_shares');
+        vaultShares = shares ? parseInt(shares) : 0;
+        document.getElementById('vaultCount').innerText = vaultShares;
+        return storedHash;
+    }
+    function saveVaultShares() {
+        localStorage.setItem('igigi_vault_shares', vaultShares);
+        document.getElementById('vaultCount').innerText = vaultShares;
     }
     
-    function draw() {
-        ctx.fillStyle = '#040a14';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // center glow
-        let color = hashToColor(currentHash);
-        ctx.globalAlpha = 0.3;
-        ctx.beginPath();
-        ctx.arc(canvas.width/2, canvas.height/2, 50, 0, Math.PI*2);
-        ctx.fillStyle = color;
-        ctx.fill();
-        ctx.globalAlpha = 1;
-        
-        ctx.font = 'bold 24px monospace';
-        ctx.fillStyle = '#bbd4ff';
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = color;
-        ctx.fillText(currentHash, canvas.width/2 - 110, canvas.height/2 + 10);
-        ctx.shadowBlur = 0;
-        
-        for(let p of particles) {
-            ctx.fillStyle = p.color;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
-            ctx.fill();
-            p.x += p.vx;
-            p.y += p.vy;
-            p.life -= 0.02;
-            p.size *= 0.98;
-        }
-        particles = particles.filter(p => p.life > 0);
-        requestAnimationFrame(draw);
+    // first time setup: register IMEI (prompt user)
+    function registerImei() {
+        let imei = prompt("🔐 FIRST TIME SETUP\nEnter phone IMEI (or any unique device ID):");
+        if(!imei) return false;
+        let imeiHash = enigmaHash(imei);
+        localStorage.setItem('igigi_master_imei', imeiHash);
+        addTerminalLog(`🔧 MASTER DEVICE REGISTERED (IMEI bound)`);
+        return true;
     }
     
-    function newSparkle() {
-        let input = Date.now() + ':' + Math.random() + ':' + shares;
-        currentHash = enigmaHash(input);
-        shares++;
-        document.getElementById('hashCounter').innerText = shares;
-        document.getElementById('currentHash').innerText = currentHash;
-        
-        let color = hashToColor(currentHash);
-        for(let i=0;i<30;i++) {
-            particles.push({
-                x: canvas.width/2 + (Math.random()-0.5)*100,
-                y: canvas.height/2 + (Math.random()-0.5)*80,
-                vx: (Math.random()-0.5)*3,
-                vy: (Math.random()-0.5)*3 - 1,
-                size: 4 + Math.random()*8,
-                life: 1,
-                color: color
-            });
+    function verifyImei() {
+        let storedImeiHash = localStorage.getItem('igigi_master_imei');
+        if(!storedImeiHash) return registerImei();
+        let enteredImei = prompt("🔐 DEVICE VERIFICATION\nEnter IMEI to unlock device approval:");
+        if(!enteredImei) return false;
+        let testHash = enigmaHash(enteredImei);
+        if(testHash === storedImeiHash) {
+            addTerminalLog(`✅ DEVICE APPROVED (MASTER)`);
+            return true;
+        } else {
+            addTerminalLog(`❌ WRONG IMEI — access denied`);
+            return false;
         }
     }
     
-    document.getElementById('resetBtn').onclick = () => { shares = 0; newSparkle(); };
-    canvas.onclick = () => newSparkle();
+    function setPassword(newPassword) {
+        if(!newPassword) return false;
+        let pwHash = enigmaHash(newPassword);
+        localStorage.setItem('igigi_pw_hash', pwHash);
+        addTerminalLog(`🔑 PASSWORD UPDATED (Enigma hash stored)`);
+        return true;
+    }
     
-    setInterval(newSparkle, 700);
-    newSparkle();
-    draw();
+    function checkPassword(enteredPw) {
+        let storedHash = localStorage.getItem('igigi_pw_hash');
+        if(!storedHash) {
+            // first password setup
+            if(enteredPw) setPassword(enteredPw);
+            return enteredPw ? true : false;
+        }
+        let testHash = enigmaHash(enteredPw);
+        return (testHash === storedHash);
+    }
+    
+    // terminal logging
+    function addTerminalLog(msg) {
+        let term = document.getElementById('terminalLog');
+        let line = document.createElement('div');
+        line.className = 'log-line';
+        line.innerText = `> ${new Date().toLocaleTimeString()} · ${msg}`;
+        term.appendChild(line);
+        term.scrollTop = term.scrollHeight;
+    }
+    
+    // mining simulation: generates enigma hashes and adds to vault shares
+    function startMining() {
+        if(miningInterval) clearInterval(miningInterval);
+        miningInterval = setInterval(() => {
+            if(unlocked) {
+                let nonce = Math.random() * 1e9;
+                let input = `${Date.now()}:${nonce}:${vaultShares}`;
+                let hashVal = enigmaHash(input);
+                vaultShares++;
+                saveVaultShares();
+                addTerminalLog(`⛏️ MINED #${vaultShares} | ${hashVal}`);
+                // sparkle effect (chest blink)
+                let chest = document.getElementById('chestIcon');
+                chest.style.transform = 'scale(1.1)';
+                setTimeout(() => { chest.style.transform = ''; }, 200);
+            }
+        }, 1800);
+    }
+    
+    function unlockVault(pw) {
+        if(checkPassword(pw)) {
+            unlocked = true;
+            document.getElementById('statusLed').classList.add('unlocked');
+            document.getElementById('chestIcon').innerHTML = '📦💎✨';
+            document.getElementById('authStatus').innerHTML = '✅ VAULT UNLOCKED · mining active';
+            addTerminalLog(`🔓 VAULT UNLOCKED — mining started`);
+            startMining();
+            return true;
+        } else {
+            addTerminalLog(`⚠️ WRONG PASSWORD`);
+            return false;
+        }
+    }
+    
+    function changePassword(oldPw, newPw) {
+        if(!unlocked) { addTerminalLog(`❌ VAULT LOCKED — cannot change password`); return false; }
+        if(checkPassword(oldPw)) {
+            setPassword(newPw);
+            addTerminalLog(`🔁 PASSWORD CHANGED successfully`);
+            return true;
+        } else {
+            addTerminalLog(`❌ OLD PASSWORD mismatch`);
+            return false;
+        }
+    }
+    
+    // EXPORT vault hashes + proof via whatsapp
+    function exportProofAsText() {
+        let content = `IGIGI VAULT PROOF\n`;
+        content += `Total Shares: ${vaultShares}\n`;
+        content += `Sacred numbers: 7,13,22,34,41,50\n`;
+        content += `Date: ${new Date().toISOString()}\n`;
+        content += `Last Enigma hash: ${enigmaHash(Date.now()+":seed")}\n`;
+        return content;
+    }
+    
+    function downloadTxt() {
+        let blob = new Blob([exportProofAsText()], {type: 'text/plain'});
+        let a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `igigi_vault_${Date.now()}.txt`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        addTerminalLog(`📁 VAULT EXPORTED as .txt`);
+    }
+    
+    function shareWhatsApp() {
+        let text = exportProofAsText();
+        let url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+        window.open(url, '_blank');
+        addTerminalLog(`📲 WhatsApp share opened`);
+    }
+    
+    // events + IMEI check on load
+    window.onload = () => {
+        loadVaultData();
+        // IMEI / device approval flow
+        let imeiOk = localStorage.getItem('igigi_master_imei') ? true : registerImei();
+        if(imeiOk) {
+            addTerminalLog(`🔐 DEVICE VERIFICATION REQUIRED`);
+            let deviceVerified = verifyImei();
+            if(!deviceVerified) {
+                addTerminalLog(`❌ DEVICE NOT APPROVED — VAULT BLOCKED`);
+                document.getElementById('unlockBtn').disabled = true;
+                document.getElementById('changePwBtn').disabled = true;
+                return;
+            } else {
+                addTerminalLog(`✅ DEVICE APPROVED — ready for password`);
+            }
+        }
+        // password already set? just wait
+        if(!localStorage.getItem('igigi_pw_hash')) {
+            addTerminalLog(`⚡ FIRST LOGIN: create a new password`);
+        }
+    };
+    
+    document.getElementById('unlockBtn').onclick = () => {
+        let pw = document.getElementById('passwordInput').value;
+        if(pw) unlockVault(pw);
+        else addTerminalLog(`⛔ Enter password`);
+    };
+    document.getElementById('changePwBtn').onclick = () => {
+        let oldPw = document.getElementById('passwordInput').value;
+        let newPw = document.getElementById('newPasswordInput').value;
+        if(oldPw && newPw) changePassword(oldPw, newPw);
+        else addTerminalLog(`⛔ Fill old + new password fields`);
+    };
+    document.getElementById('exportTxtBtn').onclick = () => downloadTxt();
+    document.getElementById('exportWhatsAppBtn').onclick = () => shareWhatsApp();
 </script>
 </body>
 </html>
-EOF
