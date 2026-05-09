@@ -1,4 +1,42 @@
-px;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Igigi Vault · Treasure Chest</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0e1a;
+            font-family: 'Courier New', monospace;
+            padding: 1rem;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .vault-container {
+            max-width: 1200px;
+            width: 100%;
+            background: #0f1322;
+            border-radius: 2rem;
+            border: 1px solid #ffaa33;
+            overflow: hidden;
+        }
+        .header {
+            background: #080c18;
+            padding: 1rem;
+            border-bottom: 1px solid #ffaa33;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .title { color: #ffcc66; font-weight: bold; }
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            min-height: 450px;
         }
         .vault-panel {
             background: #0c1020;
@@ -253,7 +291,17 @@ px;
         let blob = new Blob([getExportText()], {type: 'text/plain'});
         let a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.
+        a.download = `igigi_vault_${Date.now()}.txt`;
+        a.click();
+        log(`📁 VAULT EXPORTED`);
+    }
+    function shareWhatsApp() {
+        let url = `https://wa.me/?text=${encodeURIComponent(getExportText())}`;
+        window.open(url, '_blank');
+        log(`📲 WhatsApp share opened`);
+    }
+
+    // Auto refresh balance
     setInterval(updateBalance, 45000);
     
     // Events
