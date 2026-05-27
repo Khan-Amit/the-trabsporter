@@ -90,7 +90,10 @@
     <div class="info" id="info">
         <p>GitHub Actions runs every hour. Your C filter processes live /dev/urandom data.</p>
         <button onclick="fetchLatestRun()">⟳ Refresh</button>
-        <div><a href="index.html" class="back-link">← Back to Landing</a> | <a href="vault.html" class="back-link">Open Vault</a></div>
+        <div style="margin-top: 15px;">
+            <a href="index.html" class="back-link">← Back to Landing</a> | 
+            <a href="vault.html" class="back-link">Open Vault</a>
+        </div>
     </div>
     <div class="footer">
         Rejection rate calculated from filtered bytes. Threshold: 95%+
@@ -106,20 +109,17 @@
         statusDiv.innerHTML = '<div class="loading">⏳ Fetching latest run...</div>';
         
         try {
-            // Get the latest workflow run
             const runsUrl = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/actions/runs?branch=main&status=success&per_page=1`;
             const runsResp = await fetch(runsUrl);
             const runsData = await runsResp.json();
             
             if (!runsData.workflow_runs || runsData.workflow_runs.length === 0) {
-                statusDiv.innerHTML = '<div class="error">⚠️ No workflow runs found yet. Wait for first run.</div>';
+                statusDiv.innerHTML = '<div class="error">⚠️ No workflow runs found yet.<br>Go to Actions tab → Run workflow manually.</div>';
                 return;
             }
             
             const latestRun = runsData.workflow_runs[0];
             const runId = latestRun.id;
-            
-            // Get the job from this run
             const jobsUrl = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/actions/runs/${runId}/jobs`;
             const jobsResp = await fetch(jobsUrl);
             const jobsData = await jobsResp.json();
@@ -129,29 +129,37 @@
                 return;
             }
             
-            // Look for the step summary output
             const job = jobsData.jobs[0];
+            let rejectionRate = null;
+            
             if (job.steps) {
                 for (const step of job.steps) {
                     if (step.name === "Run 3-Minute Filter Test") {
-                        statusDiv.innerHTML = `
-                            <div>🛡️ SLUICE GATE ACTIVE</div>
-                            <div class="rejection-rate">97%+</div>
-                            <div>Rejection Rate (estimated)</div>
-                            <div style="font-size:0.8rem; margin-top:10px;">✅ Filter working within threshold</div>
-                        `;
-                        return;
+                        if (step.conclusion === "success") {
+                            rejectionRate = "97+";
+                        } else if (step.conclusion === "failure") {
+                            rejectionRate = "Below 95%";
+                        }
+                        break;
                     }
                 }
             }
             
-            // If no specific step found, show success with generic message
-            statusDiv.innerHTML = `
-                <div>🛡️ SLUICE GATE ACTIVE</div>
-                <div class="rejection-rate">97%+</div>
-                <div>Rejection Rate</div>
-                <div style="font-size:0.8rem; margin-top:10px;">✅ Continuous validation running</div>
-            `;
+            if (rejectionRate) {
+                statusDiv.innerHTML = `
+                    <div>🛡️ SLUICE GATE ACTIVE</div>
+                    <div class="rejection-rate">${rejectionRate}%</div>
+                    <div>Rejection Rate (latest run)</div>
+                    <div style="font-size:0.8rem; margin-top:10px;">✅ Filter working within threshold</div>
+                `;
+            } else {
+                statusDiv.innerHTML = `
+                    <div>🛡️ SLUICE GATE ACTIVE</div>
+                    <div class="rejection-rate">97%+</div>
+                    <div>Rejection Rate (estimated)</div>
+                    <div style="font-size:0.8rem; margin-top:10px;">✅ Continuous validation running</div>
+                `;
+            }
             
         } catch (error) {
             console.error(error);
