@@ -1,77 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Igigi Vault · Wave Watcher</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: #0a0e1a;
-            font-family: 'Courier New', monospace;
-            padding: 1rem;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .container {
-            max-width: 1200px;
-            width: 100%;
-            background: #0f1322;
-            border-radius: 2rem;
-            border: 1px solid #ffaa33;
-            overflow: hidden;
-        }
-        .header {
-            background: #080c18;
-            padding: 1rem;
-            border-bottom: 1px solid #ffaa33;
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            min-height: 450px;
-        }
-        .chest-panel {
-            background: #0c1020;
-            padding: 1.5rem;
-            border-right: 1px solid #2a3a60;
-        }
-        .chest {
-            text-align: center;
-            background: #080c1a;
-            border-radius: 1.5rem;
-            padding: 1rem;
-            border: 2px solid #ffaa33;
-            margin-bottom: 1.5rem;
-        }
-        .chest-icon { font-size: 4rem; }
-        .share-number { font-size: 2rem; color: #ffcc66; }
-        .btc-number { font-size: 1.2rem; color: #88ff88; }
-        .input-group {
-            display: flex;
-            gap: 8px;
-            margin: 12px 0;
-            flex-wrap: wrap;
-        }
-        input {
-            background: #010410;
-            border: 1px solid #2a3a60;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 2rem;
-            flex: 1;
-        }
-        button {
-            background: #1f2c46;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 2rem;
-            color: white;
+color: white;
             cursor: pointer;
         }
         button.primary { background: #2a4a7a; }
@@ -145,38 +72,7 @@
         let h = GOLDEN >>> 0;
         for (let i = 0; i < str.length; i++) {
             let c = str.charCodeAt(i);
-            let k = SACRED[i % SACRED.length];
-            h = ((h << 4) ^ (h >>> 28) ^ c ^ k) >>> 0;
-            h = (h * 33) ^ (h + k);
-            h = h >>> 0;
-        }
-        return h.toString(16).padStart(8, '0').toUpperCase();
-    }
-
-    // STORAGE KEYS
-    const KEY_PW = 'igigi_wave_pw';
-    const KEY_SHARES = 'igigi_wave_shares';
-
-    let unlocked = false;
-    let shares = 0;
-    let miningInterval = null;
-    let lastHash = '';
-    const BTC_ADDR = "bc1qk7ajtrgplvn25600wm7gx9u5c5nk8kz9dfpcqy";
-
-    // Helper functions
-    function log(msg) {
-        const term = document.getElementById('terminalLog');
-        const div = document.createElement('div');
-        div.className = 'log-line';
-        div.innerText = `> ${new Date().toLocaleTimeString()} · ${msg}`;
-        term.appendChild(div);
-        term.scrollTop = term.scrollHeight;
-        if (term.children.length > 200) term.removeChild(term.children[0]);
-    }
-
-    function showMsg(msg, isError = false) {
-        const el = document.getElementById('statusMsg');
-        el.innerText = msg;
+            let k = SACR
         el.style.color = isError ? '#ff8866' : '#88ff88';
         setTimeout(() => el.innerText = '', 3000);
     }
@@ -247,8 +143,7 @@
             return true;
         } else if (verifyPassword(pw)) {
             unlocked = true;
-            document.getElementById('chestIcon').innerHTML = '📦💎✨';
-            document.getElementById('minerState').innerHTML = '🟢 MINING';
+            document.getElementById('chestIcon').inneryId('minerState').innerHTML = '🟢 MINING';
             log(`🔓 VAULT UNLOCKED`);
             startLocalMining();
             showMsg("Vault unlocked.");
