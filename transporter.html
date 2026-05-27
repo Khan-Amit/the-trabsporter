@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>IGIGI VAULT · TRANSPORTER</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0a0f1e;
+            font-family: 'Courier New', monospace;
+            color: #9cdbff;
+            padding: 20px;
+        }
+        .vault {
+            max-width: 700px;
+            margin: 0 auto;
+            background: #0f172a;
+            border-radius: 24px;
+            border: 1px solid #1e293b;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
+        .header {
+            background: #020617;
+            padding: 16px 20px;
+            border-bottom: 1px solid #1e293b;
+        }
+        .header h1 {
+            color: #00f2fe;
+            font-size: 1.4rem;
+        }
+        .balance {
+            background: #010409;
+            padding: 16px;
+            text-align: center;
+            border-bottom: 1px solid #2d3748;
+        }
+        .balance .amount {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #00f2fe;
+        }
+        .balance .currency {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+        .wallet-input {
+            background: #010409;
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #2d3748;
+        }
+        .wallet-input input {
+            background: #1e293b;
+            border: 1px solid #2d3748;
+            color: #9cdbff;
+            padding: 8px;
+            font-family: monospace;
+            border-radius: 8px;
+            width: 80%;
+            font-size: 0.7rem;
+        }
+        .wallet-input button {
+            background: #2e7d64;
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-family: monospace;
+            margin-left: 8px;
+        }
+        .terminal {
+            background: #010409;
+            padding: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            height: 250px;
+            overflow-y: auto;
+            border-bottom: 1px solid #2d3748;
+        }
+        .terminal p {
+            margin: 4px 0;
+            white-space: pre-wrap;
+            color: #9cdbff;
+        }
+        .terminal .accepted {
+            color: #80e0b0;
+        }
+        .lock-area {
+            padding: 16px;
+            text-align: center;
+        }
+        input[type="password"] {
+            background: #1e293b;
+            border: 1px solid #2d3748;
+            color: #9cdbff;
+            padding: 10px;
+            font-family: monospace;
+            border-radius: 8px;
+            width: 200px;
+            text-align: center;
+        }
+        button {
+            background: #2e7d64;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-family: monospace;
+            margin-left: 10px;
+        }
+        .status {
+            margin-top: 10px;
+            font-size: 0.7rem;
+            color: #94a3b8;
+        }
+        .footer {
+            padding: 12px;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #475569;
+            border-top: 1px solid #1e293b;
+        }
+        .control-bar {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 16px;
+            border-bottom: 1px solid #1e293b;
+        }
+        .start-btn { background: #2e7d64; }
+        .stop-btn { background: #c2410c; }
+    </style>
+</head>
+<body>
+<div class="vault">
+    <div class="header">
+        <h1>⚡ IGIGI VAULT · TRANSPORTER</h1>
+    </div>
+    
+    <div class="balance">
+        <div class="amount" id="xmrBalance">0.00000000</div>
+        <div class="currency">XMR · MONERO</div>
+    </div>
+    
+    <div class="wallet-input">
+        <input type="text" id="walletAddress" placeholder="Monero wallet address (starts with 4 or 8)" value="44osUR6e9UjePWUQhavLNYTY7JSzwZMN6249AdnjbwmtXtirsjDiGcejCjJkoTst2BGD3NaLrtpzNENsc6AsZ9AGKWTx7YZ">
+        <button id="updateWalletBtn">UPDATE</button>
+    </div>
+    
+    <div class="control-bar">
+        <button id="startMiningBtn" class="start-btn">▶ START MINING</button>
+        <button id="stopMiningBtn" class="stop-btn">⏹ STOP MINING</button>
+    </div>
+    
+    <div class="terminal" id="terminal">
+        <p>> VAULT READY</p>
+        <p>> Enter password to unlock</p>
+    </div>
+    
+    <div class="lock-area">
+        <input type="password" id="vaultPassword" placeholder="password">
+        <button id="unlockBtn">UNLOCK</button>
+        <div id="statusMsg" class="status"></div>
+    </div>
+    
+    <div class="footer">MONERO ACCEPTED · WAVE WATCHER · REAL MINING SIMULATION</div>
+</div>
+
+<script>
+    // Password protection
+    const CORRECT_PASSWORD = "enigma";
+    let unlocked = false;
+    let miningInterval = null;
+    let totalShares = 0;
+    let xmrBalance = 0;
+    
+    const terminalDiv = document.getElementById('terminal');
+    const balanceSpan = document.getElementById('xmrBalance');
+    const passwordInput = document.getElementById('vaultPassword');
+    const unlockBtn = document.getElementById('unlockBtn');
+    const startBtn = document.getElementById('startMiningBtn');
+    const stopBtn = document.getElementById('stopMiningBtn');
+    const statusMsg = document.getElementById('statusMsg');
+    const walletInput = document.getElementById('walletAddress');
+    const updateWalletBtn = document.getElementById('updateWalletBtn');
+    
+    let currentWallet = walletInput.value;
+    
+    function addTerminalLine(text, className = '') {
+        const p = document.createElement('p');
+        p.className = className;
+        p.textContent = `> ${new Date().toLocaleTimeString()} · ${text}`;
+        terminalDiv.appendChild(p);
+        p.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        while (terminalDiv.children.length > 200) {
+            terminalDiv.removeChild(terminalDiv.firstChild);
+        }
+    }
+    
+    function updateBalance() {
+        balanceSpan.textContent = xmrBalance.toFixed(8);
+    }
+    
+    function mineShare() {
+        if (!unlocked) return;
+        // Simulate mined share
+        totalShares++;
+        const reward = (Math.random() * 9 + 1) * 1e-8;
+        xmrBalance += reward;
+        updateBalance();
+        addTerminalLine(`✅ ACCEPTED SHARE #${totalShares} · +${reward.toFixed(8)} XMR`, 'accepted');
+        if (totalShares % 10 === 0) {
+            addTerminalLine(`📊 STATS · Shares: ${totalShares} · Hashrate: ~${Math.floor(Math.random() * 50 + 30)} H/s`);
+        }
+    }
+    
+    function startMining() {
+        if (!unlocked) {
+            addTerminalLine('🔒 VAULT LOCKED · Enter password first');
+            return;
+        }
+        if (miningInterval) clearInterval(miningInterval);
+        miningInterval = setInterval(mineShare, 3000);
+        addTerminalLine('🚀 MINING ACTIVE · POOL: gulf.moneroocean.stream');
+        addTerminalLine(`💰 WALLET: ${currentWallet.substring(0, 20)}...`);
+    }
+    
+    function stopMining() {
+        if (miningInterval) {
+            clearInterval(miningInterval);
+            miningInterval = null;
+            addTerminalLine('⏹️ MINING STOPPED · Shares: ' + totalShares);
+        }
+    }
+    
+    unlockBtn.addEventListener('click', () => {
+        const entered = passwordInput.value;
+        if (entered === CORRECT_PASSWORD) {
+            unlocked = true;
+            statusMsg.textContent = '✅ VAULT UNLOCKED · ACCESS GRANTED';
+            statusMsg.style.color = '#80e0b0';
+            addTerminalLine('🔓 VAULT UNLOCKED · ACCESS GRANTED');
+        } else {
+            unlocked = false;
+            statusMsg.textContent = '❌ WRONG PASSWORD · ACCESS DENIED';
+            statusMsg.style.color = '#f08080';
+            addTerminalLine('⛔ ACCESS DENIED · INVALID PASSWORD');
+            stopMining();
+        }
+        passwordInput.value = '';
+    });
+    
+    startBtn.addEventListener('click', () => {
+        startMining();
+    });
+    
+    stopBtn.addEventListener('click', () => {
+        stopMining();
+    });
+    
+    updateWalletBtn.addEventListener('click', () => {
+        const newWallet = walletInput.value.trim();
+        if (newWallet.length > 50) {
+            currentWallet = newWallet;
+            addTerminalLine(`🔑 WALLET UPDATED · ${currentWallet.substring(0, 30)}...`);
+            statusMsg.textContent = '✅ Wallet address updated';
+            statusMsg.style.color = '#80e0b0';
+            setTimeout(() => { statusMsg.textContent = ''; }, 2000);
+        } else {
+            addTerminalLine('❌ INVALID WALLET ADDRESS · Must be 95 chars');
+            statusMsg.textContent = '❌ Invalid wallet address';
+            statusMsg.style.color = '#f08080';
+        }
+    });
+    
+    // Initial terminal message
+    addTerminalLine('VAULT READY · Enter password to unlock');
+</script>
+</body>
+</html>
